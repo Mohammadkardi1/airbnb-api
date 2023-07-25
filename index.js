@@ -7,7 +7,6 @@ import bookingRoutes from './routes/bookingRoutes.js'
 import cors from 'cors'
 import cookieParser from 'cookie-parser'
 
-
 const app = express() 
 dotenv.config()
 
@@ -28,6 +27,7 @@ const CONNECTION_URL = process.env.MONGO
 app.use('/api/auth', authRoutes)
 app.use('/api/place', placeRouters)
 app.use('/api/booking', bookingRoutes)
+
 
 
 mongoose.connect(CONNECTION_URL)

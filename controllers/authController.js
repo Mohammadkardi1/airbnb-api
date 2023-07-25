@@ -27,19 +27,15 @@ export const register = async (req, res) => {
             return res.status(400).json({message: 'Email is already registered. Please log in.'})
         }
 
-
         const salt = await bcrypt.genSalt(10)
         const hashPassword = await bcrypt.hash(password, salt)
 
-
         const newUser = await authModel.create({username, email, password: hashPassword})
-
 
 		const verifiedToken = await tokenModel.create({
 			userId: newUser._id,
 			token: crypto.randomBytes(32).toString("hex"),
 		})
-
 
         const url = `${process.env.BASE_URL}/api/auth/${newUser._id}/verify/${verifiedToken.token}`;
 		await sendEmail(
