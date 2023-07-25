@@ -11,7 +11,7 @@ const locationSchema = new mongoose.Schema({
 const reviewSchema = mongoose.Schema({
   user: { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'auth' },
   comment: { type: String, required: true },
-  rating: { type: Number, required: true, default:1, min: 1, max: 5 },
+  rating: { type: Number, required: true, default: 1, min: 1, max: 5 },
 })
 
 const placeSchema = mongoose.Schema({

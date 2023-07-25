@@ -26,6 +26,17 @@ export const getAllPlaces = async (req, res) => {
         res.status(404).json({message: error.message})
     }
 }
+export const getPlace = async (req, res) => {
+    try {
+        const place = await placeModel.findById(req.params.id).populate({
+            path: 'reviews.user',
+            model: 'auth'
+          }).populate('owner')
+        res.status(200).json({data: place})
+    } catch (error) {
+        res.status(404).json({message: error.message})
+    }
+}
 
 export const removePlace = async (req, res) => {
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
@@ -66,7 +77,10 @@ export const setUnavailableDates = async (req, res) => {
         req.body.timestamps.forEach(timestamp => {
             place.unavailableDates.push(timestamp);
           })
-        const updatedPlace = await placeModel.findByIdAndUpdate(req.params.id, place, {new: true})
+        const updatedPlace = await placeModel.findByIdAndUpdate(req.params.id, place, {new: true}).populate({
+            path: 'reviews.user',
+            model: 'auth'
+          }).populate('owner')
         res.status(200).json({data: updatedPlace})
     } catch (error) {
         res.status(500).json({message: error.message})
@@ -106,7 +120,10 @@ export const getUserPlaces = async (req, res) => {
     let decodedData = jwt.verify(token, process.env.JWT_SECRET)
     // const { id } = req.params
     try {
-        const response = await placeModel.find({owner:decodedData.id})
+        const response = await placeModel.find({owner:decodedData.id}).populate({
+            path: 'reviews.user',
+            model: 'auth'
+          }).populate('owner')
         res.status(200).json({data: response})
     } catch (error) {
         res.status(404).json({message: error.message})
@@ -127,7 +144,10 @@ export const favoritePlace = async (req, res) => {
         } else {
             place.favorites = place.favorites.filter((id) => id !== String(req.userId)) 
         }
-        const updatedPlace = await placeModel.findByIdAndUpdate(req.params.id, place, {new: true})
+        const updatedPlace = await placeModel.findByIdAndUpdate(req.params.id, place, {new: true}).populate({
+            path: 'reviews.user',
+            model: 'auth'
+          }).populate('owner');
         res.status(200).json({data: updatedPlace})
     } catch (error) {
         res.status(500).json({message: error.message})
@@ -138,7 +158,10 @@ export const favoritePlace = async (req, res) => {
 
 export const getFavoritePlaces = async (req, res) => {
     try {
-        const places = await placeModel.find({ favorites: { $in: req.userId } })
+        const places = await placeModel.find({ favorites: {$in: req.userId}}).populate({
+            path: 'reviews.user',
+            model: 'auth'
+          }).populate('owner');
         res.status(200).json({data: places})
     } catch (error) {
         res.status(404).json({message: error.message})
@@ -146,12 +169,15 @@ export const getFavoritePlaces = async (req, res) => {
 }
 
 
-export const commentPlace = async (req, res) => {
+export const reviewPlace = async (req, res) => {
     try {
-        const place = await placeModel.findById(req.params.id)        
-        place.reviews.push({...req.body, user: req.userId});
-        await place.save();
-        res.status(200).json({data: place})
+        let place = await placeModel.findById(req.params.id)        
+        place.reviews.push({...req.body, user: req.userId})
+        const updatedPlace = await placeModel.findByIdAndUpdate(req.params.id, place, { new: true }).populate({
+            path: 'reviews.user',
+            model: 'auth'
+          }).populate('owner');
+        res.status(200).json({data: updatedPlace})
     } catch (error) {
         res.status(404).json({message: error.message})
     }
@@ -165,6 +191,13 @@ export const commentPlace = async (req, res) => {
 
 
 
+// review place
+// await place.save()
+
+// place = await placeModel.findById(req.params.id).populate({
+//     path: 'reviews.user',
+//     model: 'auth'
+//   }).populate('owner');
 
 
 
