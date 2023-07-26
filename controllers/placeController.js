@@ -2,12 +2,18 @@ import mongoose from "mongoose"
 import placeModel from '../models/placeModel.js'
 import cloudinary from 'cloudinary';
 import jwt from 'jsonwebtoken'
+import bookingModel from "../models/bookingModel.js";
 
 
-export const createPlace = async (req, res) => {
+
+export const addPlace = async (req, res) => {
     const newPost = new placeModel(req.body)
     try {
         await newPost.save()
+        // await newPost.populate({
+        //     path: 'reviews.user',
+        //     model: 'auth'
+        //   }).populate('owner').execPopulate();
         res.status(201).json({data: newPost})
     } catch (error) {
         res.status(409).json({message: error.message})
@@ -21,14 +27,19 @@ export const getAllPlaces = async (req, res) => {
             path: 'reviews.user',
             model: 'auth'
           }).populate('owner')
+
+        console.log('All places', places)
         res.status(200).json({data: places})
     } catch (error) {
         res.status(404).json({message: error.message})
     }
 }
+
+
+
 export const getPlace = async (req, res) => {
     try {
-        const place = await placeModel.findById(req.params.id).populate({
+        const place = await placeModel.findById(req.params.placeID).populate({
             path: 'reviews.user',
             model: 'auth'
           }).populate('owner')
@@ -39,7 +50,7 @@ export const getPlace = async (req, res) => {
 }
 
 export const removePlace = async (req, res) => {
-    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+    if (!mongoose.Types.ObjectId.isValid(req.params.placeID)) {
         return res.status(404).json({message: 'No place with that ID'})
     } 
     cloudinary.config({
@@ -48,7 +59,10 @@ export const removePlace = async (req, res) => {
         api_secret: process.env.CLOUD_KEY_SECRET
       })
     try {
-        const place = await placeModel.findById(req.params.id)
+        const place = await placeModel.findById(req.params.placeID)
+        if (req.userId !== place.owner.toString() ) {
+            return res.status(401).json({message: "Unauthorized"})
+        }
         for (let i = 0; i < place.photos.length ; i++ ) {
             const imgPublicId = place.photos[i].public_id
             if (imgPublicId) {
@@ -61,7 +75,8 @@ export const removePlace = async (req, res) => {
                   });
             }
         }
-        const deletedPost = await placeModel.findByIdAndDelete(req.params.id)
+        await bookingModel.deleteMany({ place: req.params.placeID });
+        const deletedPost = await placeModel.findByIdAndDelete(req.params.placeID)
         res.status(200).json({data: deletedPost})
     } catch (error) {
         res.status(500).json({message: error.message})
@@ -69,15 +84,15 @@ export const removePlace = async (req, res) => {
 } 
 
 export const setUnavailableDates = async (req, res) => {
-    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+    if (!mongoose.Types.ObjectId.isValid(req.params.placeID)) {
         return res.status(404).json({message: 'No place with that ID'})
     }
     try {
-        const place = await placeModel.findById(req.params.id)
+        const place = await placeModel.findById(req.params.placeID)
         req.body.timestamps.forEach(timestamp => {
             place.unavailableDates.push(timestamp);
           })
-        const updatedPlace = await placeModel.findByIdAndUpdate(req.params.id, place, {new: true}).populate({
+        const updatedPlace = await placeModel.findByIdAndUpdate(req.params.placeID, place, {new: true}).populate({
             path: 'reviews.user',
             model: 'auth'
           }).populate('owner')
@@ -88,39 +103,51 @@ export const setUnavailableDates = async (req, res) => {
 }
 
 export const editPlace = async (req, res) => {
+    const { placeID } = req.params
+    if (!mongoose.Types.ObjectId.isValid(placeID)) {
+        return res.status(404).json({message: 'No place with that ID'})
+    } 
+
     try {
-        const { id } = req.params
-        if (!mongoose.Types.ObjectId.isValid(id)) {
-            return res.status(404).json({message: 'No place with that ID'})
-        } 
-        const place = await placeModel.findById(id) 
+        const place = await placeModel.findById(placeID) 
         if (!place) {
             return res.status(404).json({message: 'Place not found'})
         }
+        if (req.userId !== place.owner.toString() ) {
+            return res.status(401).json({message: "Unauthorized"})
+        }
+
         place.title = req.body.title || place.title
         place.location = req.body.location || place.location
-        place.photos = req.body.photos || place.photos
         place.description = req.body.description || place.description
+        place.photos = req.body.photos || place.photos
+        place.perks = req.body.perks  || place.perks
+        place.extraInfo = req.body.extraInfo  || place.extraInfo
+        place.category = req.body.category || place.category
         place.maxGuests = req.body.maxGuests || place.maxGuests
         place.rooms = req.body.rooms || place.rooms
         place.bathrooms = req.body.bathrooms || place.bathrooms
         place.price = req.body.price || place.price
-        place.category = req.body.category || place.category
-        place.perks = req.body.perks 
-        place.extraInfo = req.body.extraInfo 
-        await place.save()
-        return res.status(200).json(place)
+
+
+        const updatedPlace = await placeModel.findByIdAndUpdate(placeID, place, {new: true}).populate({
+            path: 'reviews.user',
+            model: 'auth'
+          }).populate('owner');
+        
+        return  res.status(200).json({data: updatedPlace})
     } catch (error) {
         res.status(400).json({message: error.message})
     }
 }
 
+
 export const getUserPlaces = async (req, res) => {
-    const token = req.headers.authorization.split(" ")[1]
-    let decodedData = jwt.verify(token, process.env.JWT_SECRET)
+    // const token = req.headers.authorization.split(" ")[1]
+    // let decodedData = jwt.verify(token, process.env.JWT_SECRET)
     // const { id } = req.params
     try {
-        const response = await placeModel.find({owner:decodedData.id}).populate({
+        const response = await placeModel.find({owner:req.userId}).populate({
             path: 'reviews.user',
             model: 'auth'
           }).populate('owner')
@@ -133,18 +160,18 @@ export const getUserPlaces = async (req, res) => {
 
 
 export const favoritePlace = async (req, res) => {
-    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+    if (!mongoose.Types.ObjectId.isValid(req.params.placeID)) {
         return res.status(404).json({message: "No place with that ID"})
     }
     try {
-        const place = await placeModel.findById(req.params.id)
+        const place = await placeModel.findById(req.params.placeID)
         const index = place.favorites.findIndex((id) => id === String(req.userId))
         if (index === -1 ) {
             place.favorites.push(req.userId)
         } else {
             place.favorites = place.favorites.filter((id) => id !== String(req.userId)) 
         }
-        const updatedPlace = await placeModel.findByIdAndUpdate(req.params.id, place, {new: true}).populate({
+        const updatedPlace = await placeModel.findByIdAndUpdate(req.params.placeID, place, {new: true}).populate({
             path: 'reviews.user',
             model: 'auth'
           }).populate('owner');
@@ -171,9 +198,9 @@ export const getFavoritePlaces = async (req, res) => {
 
 export const reviewPlace = async (req, res) => {
     try {
-        let place = await placeModel.findById(req.params.id)        
+        let place = await placeModel.findById(req.params.placeID)        
         place.reviews.push({...req.body, user: req.userId})
-        const updatedPlace = await placeModel.findByIdAndUpdate(req.params.id, place, { new: true }).populate({
+        const updatedPlace = await placeModel.findByIdAndUpdate(req.params.placeID, place, { new: true }).populate({
             path: 'reviews.user',
             model: 'auth'
           }).populate('owner');
@@ -198,6 +225,9 @@ export const reviewPlace = async (req, res) => {
 //     path: 'reviews.user',
 //     model: 'auth'
 //   }).populate('owner');
+
+
+
 
 
 

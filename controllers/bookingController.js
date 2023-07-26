@@ -6,6 +6,7 @@ export const addBooking = async (req, res) => {
     const newBooking = new bookingModel(req.body)
     try {
         await newBooking.save()
+        await newBooking.populate('place').execPopulate();
         res.status(201).json({data: newBooking})
     } catch (error) {
         res.status(409).json({ message: error.message })
@@ -33,7 +34,8 @@ export const getTrips = async (req, res) => {
     }
 }
 
-export const getReservations = async (req, res) => {
+
+export const getBookingsOnProperties = async (req, res) => {
     const token = req.headers.authorization.split(" ")[1]
     let decodedData = jwt.verify(token, process.env.JWT_SECRET)
 

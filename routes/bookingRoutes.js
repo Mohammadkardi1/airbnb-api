@@ -2,15 +2,17 @@ import express from "express";
 import { addBooking, 
         getAllBooking,
         getTrips,
-        getReservations } from '../controllers/bookingController.js'
+        getBookingsOnProperties } from '../controllers/bookingController.js'
+import authMiddleware from "../middleware/authMiddleware.js";
+
 
 const router = express.Router()
 
 
-router.post('/addBooking', addBooking)
-router.get('/allBookings', getAllBooking)
-router.get('/trips', getTrips)
-router.get('/reservations', getReservations)
+router.post('/addBooking', authMiddleware , addBooking)
+router.get('/allBookings', authMiddleware, getAllBooking)
+router.get('/trips', authMiddleware, getTrips)
+router.get('/bookingsOnProperties', authMiddleware, getBookingsOnProperties)
 
 
 
