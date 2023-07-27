@@ -8,7 +8,7 @@ const authMiddleware = async (req, res, next) => {
             return res.status(401).json({message: "Unauthenticated"})
         }
         let decodedData = jwt.verify(token, process.env.JWT_SECRET)
-        req.userId = decodedData?.id            
+        req.userId = decodedData?.id   
         next()
     } catch (error) {
         if (error.name === 'JsonWebTokenError') {

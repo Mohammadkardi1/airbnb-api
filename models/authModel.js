@@ -9,9 +9,9 @@ const authSchema = mongoose.Schema({
     // places: { type: [mongoose.Schema.Types.ObjectId], ref:'place' },
     // bookings: { type: [mongoose.Schema.Types.ObjectId], ref:'booking' },
 
-}, {
-    timestamps: true
-  })
+  }, 
+  {timestamps: true}
+  )
 
 
 const authModel = mongoose.model('auth', authSchema)

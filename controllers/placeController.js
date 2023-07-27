@@ -26,9 +26,9 @@ export const getAllPlaces = async (req, res) => {
         const places = await placeModel.find().populate({
             path: 'reviews.user',
             model: 'auth'
-          }).populate('owner')
+          }).populate('owner').sort({ createdAt: -1 })
 
-        console.log('All places', places)
+          
         res.status(200).json({data: places})
     } catch (error) {
         res.status(404).json({message: error.message})
@@ -150,7 +150,7 @@ export const getUserPlaces = async (req, res) => {
         const response = await placeModel.find({owner:req.userId}).populate({
             path: 'reviews.user',
             model: 'auth'
-          }).populate('owner')
+          }).populate('owner').sort({ createdAt: -1 })
         res.status(200).json({data: response})
     } catch (error) {
         res.status(404).json({message: error.message})
@@ -199,7 +199,7 @@ export const getFavoritePlaces = async (req, res) => {
 export const reviewPlace = async (req, res) => {
     try {
         let place = await placeModel.findById(req.params.placeID)        
-        place.reviews.push({...req.body, user: req.userId})
+        place.reviews.unshift({...req.body, user: req.userId})
         const updatedPlace = await placeModel.findByIdAndUpdate(req.params.placeID, place, { new: true }).populate({
             path: 'reviews.user',
             model: 'auth'

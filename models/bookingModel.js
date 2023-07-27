@@ -12,7 +12,9 @@ const bookingSchema = mongoose.Schema({
     numberOfNights: { type: String, required: true},
     checkIn: { type: String, required: true },
     checkOut: { type: String, required: true}
-})
+    },
+    { timestamps: true }
+)
 
 const bookingModel = mongoose.model('booking', bookingSchema)
 

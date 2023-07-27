@@ -32,7 +32,9 @@ const placeSchema = mongoose.Schema({
     unavailableDates: {type: [String]},
     favorites: {type: [String], default:[]},
     reviews: [reviewSchema],
-})
+  },
+  { timestamps: true }
+)
 
 const placeModel = mongoose.model('place', placeSchema)
 

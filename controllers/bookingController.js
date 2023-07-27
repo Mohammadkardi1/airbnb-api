@@ -24,10 +24,11 @@ export const getAllBooking = async (req, res) => {
 
 
 export const getTrips = async (req, res) => {
-    const token = req.headers.authorization.split(" ")[1]
-    let decodedData = jwt.verify(token, process.env.JWT_SECRET)
+    // const token = req.headers.authorization.split(" ")[1]
+    // let decodedData = jwt.verify(token, process.env.JWT_SECRET)
     try {
-        const response = await bookingModel.find({user:decodedData.id}).populate('place')
+        const response = await bookingModel.find({user: req.userId})
+        .populate('place').sort({ checkIn: 1 })
         res.status(200).json({data: response})
     } catch (error) {
         res.status(404).json({message: error.message})
@@ -36,13 +37,10 @@ export const getTrips = async (req, res) => {
 
 
 export const getBookingsOnProperties = async (req, res) => {
-    const token = req.headers.authorization.split(" ")[1]
-    let decodedData = jwt.verify(token, process.env.JWT_SECRET)
-
     try {
-        const bookings = await bookingModel.find().populate('place')
+        const bookings = await bookingModel.find().populate('place').sort({ checkIn: 1 })
         const response = bookings.filter((booking) => {
-            return String(booking.place.owner) === decodedData.id
+            return String(booking.place.owner) === req.userId 
           })
         res.status(200).json({data: response})
     } catch (error) {
