@@ -59,40 +59,15 @@ export const login = async (req, res) => {
         if (!email || !password) {
             return res.status(400).json({message: 'All fields must be filled.'})
         }
-
-
         const existingUser = await authModel.findOne({email})
         if (!existingUser) {
             return res.status(400).json({message: "User not found! Please Sign up."})
         }
-
-
-
         const isPasswordCorrect = await bcrypt.compare(password, existingUser.password)
         if (!isPasswordCorrect) {
             return res.status(400).json({message: "Wrong password! Try again."})
         }
-
-
 		if (!existingUser.verified) {   
-			// let token = await tokenModel.findOne({ userId: existingUser._id });
-			// if (!token) {
-            //     const verifiedToken = await tokenModel.create({
-            //         userId: existingUser._id,
-            //         token: crypto.randomBytes(32).toString("hex"),
-            //     })
-
-            //     const url = `${process.env.BASE_URL}/api/auth/${existingUser._id}/verify/${verifiedToken.token}`;
-            //     await sendEmail(
-            //             existingUser.email, 
-            //             "Account Verification", 
-            //             `<div>Hi ${existingUser.username},</div>
-            //             <br>
-            //             <div>
-            //                 Please Click on the link to verify your email address:${url}
-            //             </div>`,
-            //             )
-            // }
 			return res.status(400).send({ message: "Your account has not verified yet. Please check your email for a verification link." });
         }
 
