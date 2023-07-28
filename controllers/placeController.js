@@ -49,6 +49,22 @@ export const getPlace = async (req, res) => {
     }
 }
 
+
+
+
+export const getPlacesBySearch = async (req, res) => {
+    const {searchQuery} = req.query
+
+
+    const title = new RegExp(searchQuery, "i");
+    try {
+      const places = await placeModel.find({ title });
+      res.status(200).json({ data: places });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to retrieve posts." });
+    }
+}
+
 export const removePlace = async (req, res) => {
     if (!mongoose.Types.ObjectId.isValid(req.params.placeID)) {
         return res.status(404).json({message: 'No place with that ID'})

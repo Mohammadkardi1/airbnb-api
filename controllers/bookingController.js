@@ -34,12 +34,10 @@ export const getTrips = async (req, res) => {
         const now = Date.now();
         const { futureBookings, pastBookings } = bookings.reduce(
           (acc, booking) => {
-            if (String(booking.place.owner) === req.userId) {
-              if (booking.checkOut > now) {
-                acc.futureBookings.push(booking);
-              } else {
-                acc.pastBookings.push(booking);
-              }
+            if (booking.checkOut > now) {
+              acc.futureBookings.push(booking);
+            } else {
+              acc.pastBookings.push(booking);
             }
             return acc;
           },

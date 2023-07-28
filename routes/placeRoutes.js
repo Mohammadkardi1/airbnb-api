@@ -8,7 +8,8 @@ import { addPlace,
         favoritePlace,
         getFavoritePlaces,
         reviewPlace,
-        getPlace} from "../controllers/placeController.js";
+        getPlace,
+        getPlacesBySearch} from "../controllers/placeController.js";
 import authMiddleware from "../middleware/authMiddleware.js";
 
 const router = express.Router()
@@ -18,8 +19,12 @@ const router = express.Router()
 router.post('/addPlace', authMiddleware, addPlace)
 router.get('/allPlaces', getAllPlaces)
 
-
 router.get('/getPlace/:placeID', getPlace)
+router.get('/search', getPlacesBySearch)
+
+
+
+
 router.delete('/removePlace/:placeID', authMiddleware, removePlace)
 
 
