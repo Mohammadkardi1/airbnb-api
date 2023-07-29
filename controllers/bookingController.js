@@ -1,5 +1,4 @@
 import bookingModel from "../models/bookingModel.js"
-import jwt from 'jsonwebtoken'
 
 
 export const addBooking = async (req, res) => {
@@ -44,11 +43,6 @@ export const getTrips = async (req, res) => {
           { futureBookings: [], pastBookings: [] }
         )
         res.status(200).json({data: {futureBookings, pastBookings} })
-
-
-
-
-        // res.status(200).json({data: bookings})
     } catch (error) {
         res.status(404).json({message: error.message})
     }
@@ -58,11 +52,6 @@ export const getTrips = async (req, res) => {
 export const getBookingsOnProperties = async (req, res) => {
     try {
         const bookings = await bookingModel.find().populate('place').sort({ checkIn: 1 })
-        // let futureBookings = []
-        // let pastBookings = []
-        // const response = bookings.filter((booking) => {
-        //     return String(booking.place.owner) === req.userId 
-        //   })
         const now = Date.now();
         const { futureBookings, pastBookings } = bookings.reduce(
           (acc, booking) => {

@@ -6,9 +6,6 @@ const authSchema = mongoose.Schema({
     password: { type: String}, 
     picture: { type: String },
     verified: { type: Boolean, default: false},
-    // places: { type: [mongoose.Schema.Types.ObjectId], ref:'place' },
-    // bookings: { type: [mongoose.Schema.Types.ObjectId], ref:'booking' },
-
   }, 
   {timestamps: true}
   )

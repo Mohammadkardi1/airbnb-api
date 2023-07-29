@@ -15,7 +15,6 @@ const reviewSchema = mongoose.Schema({
 })
 
 const placeSchema = mongoose.Schema({
-    // owner: {type: mongoose.Schema.Types.ObjectId, ref:'auth'},
     owner: { type: mongoose.Schema.Types.ObjectId,required: true , ref: 'auth'},
     title: { type: String },
     photos: [{public_id: {type: String}, url: {type: String}}],

@@ -1,7 +1,6 @@
 import mongoose from "mongoose"
 import placeModel from '../models/placeModel.js'
 import cloudinary from 'cloudinary';
-import jwt from 'jsonwebtoken'
 import bookingModel from "../models/bookingModel.js";
 
 
@@ -10,10 +9,6 @@ export const addPlace = async (req, res) => {
     const newPost = new placeModel(req.body)
     try {
         await newPost.save()
-        // await newPost.populate({
-        //     path: 'reviews.user',
-        //     model: 'auth'
-        //   }).populate('owner').execPopulate();
         res.status(201).json({data: newPost})
     } catch (error) {
         res.status(409).json({message: error.message})
@@ -54,8 +49,6 @@ export const getPlace = async (req, res) => {
 
 export const getPlacesBySearch = async (req, res) => {
     const {searchQuery} = req.query
-
-
     const title = new RegExp(searchQuery, "i");
     try {
       const places = await placeModel.find({ title });
@@ -132,7 +125,6 @@ export const editPlace = async (req, res) => {
         if (req.userId !== place.owner.toString() ) {
             return res.status(401).json({message: "Unauthorized"})
         }
-
         place.title = req.body.title || place.title
         place.location = req.body.location || place.location
         place.description = req.body.description || place.description
@@ -144,8 +136,6 @@ export const editPlace = async (req, res) => {
         place.rooms = req.body.rooms || place.rooms
         place.bathrooms = req.body.bathrooms || place.bathrooms
         place.price = req.body.price || place.price
-
-
         const updatedPlace = await placeModel.findByIdAndUpdate(placeID, place, {new: true}).populate({
             path: 'reviews.user',
             model: 'auth'
@@ -159,9 +149,6 @@ export const editPlace = async (req, res) => {
 
 
 export const getUserPlaces = async (req, res) => {
-    // const token = req.headers.authorization.split(" ")[1]
-    // let decodedData = jwt.verify(token, process.env.JWT_SECRET)
-    // const { id } = req.params
     try {
         const response = await placeModel.find({owner:req.userId}).populate({
             path: 'reviews.user',
@@ -225,26 +212,3 @@ export const reviewPlace = async (req, res) => {
         res.status(404).json({message: error.message})
     }
 }
-
-
-// const places = await Place.find().populate({
-//     path: 'reviews.user',
-//     model: 'User'
-//   });
-
-
-
-// review place
-// await place.save()
-
-// place = await placeModel.findById(req.params.id).populate({
-//     path: 'reviews.user',
-//     model: 'auth'
-//   }).populate('owner');
-
-
-
-
-
-
-
