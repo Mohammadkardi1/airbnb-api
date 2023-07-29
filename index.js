@@ -15,7 +15,7 @@ dotenv.config()
 // middlewares
 app.use(cors({
     credentials: true,
-    origin: 'https://airbnb-clinet.vercel.app/'
+    origin: ['http://localhost:3000', 'https://airbnb-clinet.vercel.app/']
 }))
 app.use(cookieParser())
 app.use(express.json())
