@@ -39,7 +39,7 @@ export const getTrips = async (req, res) => {
             endOfToday.setHours(23, 59, 59, 999); 
 
 
-            if (booking.checkOut > endOfToday) {
+            if (checkOutDate > endOfToday) {
               acc.futureBookings.push(booking);
             } else {
               acc.pastBookings.push(booking);
