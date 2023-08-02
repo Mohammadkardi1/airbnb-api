@@ -30,10 +30,10 @@ export const getTrips = async (req, res) => {
         .populate('place').sort({ checkIn: 1 })
 
 
-        // const now = Date.now();
+        const now = Date.now();
         const { futureBookings, pastBookings } = bookings.reduce(
           (acc, booking) => {
-            if (booking.checkOut >  new Date(new Date().setHours(23, 59, 59, 999))) {
+            if (booking.checkOut > now) {
               acc.futureBookings.push(booking);
             } else {
               acc.pastBookings.push(booking);
