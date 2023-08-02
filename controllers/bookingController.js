@@ -37,7 +37,7 @@ export const getTrips = async (req, res) => {
 
         const { futureBookings, pastBookings } = bookings.reduce(
           (acc, booking) => {
-            if (booking.checkOut > startOfTodayTimestamp) {
+            if (booking.checkOut >= startOfTodayTimestamp) {
               acc.futureBookings.push(booking);
             } else {
               acc.pastBookings.push(booking);
