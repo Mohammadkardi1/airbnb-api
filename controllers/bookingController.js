@@ -33,7 +33,13 @@ export const getTrips = async (req, res) => {
         const now = Date.now();
         const { futureBookings, pastBookings } = bookings.reduce(
           (acc, booking) => {
-            if (booking.checkOut > now) {
+
+            const checkOutDate = new Date(parseInt(booking.checkOut));
+            const startOfToday = new Date();
+            startOfToday.setHours(0, 0, 0, 0); 
+
+
+            if (checkOutDate > startOfToday) {
               acc.futureBookings.push(booking);
             } else {
               acc.pastBookings.push(booking);
